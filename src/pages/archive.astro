@@ -1,0 +1,194 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import { formatDateBg } from "../lib/site";
+
+const articles = (await getCollection("articles")).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+
+const filters = [
+  "Всички",
+  "Новини",
+  "Анализи",
+  "Ръководства",
+  "Обучение",
+  "Инструменти",
+];
+---
+
+<Layout title="Архив" description="Цялата библиотека на AI Академия — новини, анализи, ръководства и учебни материали.">
+  <main class="wrap page">
+    <div class="kicker">Архив</div>
+    <h1 class="page-title">Всички статии и броеве</h1>
+    <p class="page-lead">
+      Цялата библиотека на AI Академия — новини, анализи, ръководства и учебни
+      материали, подредени по дата.
+    </p>
+
+    <div class="filters" id="filters">
+      {
+        filters.map((label, i) => (
+          <button
+            class:list={["filter-btn", { active: i === 0 }]}
+            data-filter={label}
+          >
+            {label}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="archive-list" id="archive-list">
+      {
+        articles.map((a) => (
+          <a
+            href={`/articles/${a.id}`}
+            class="archive-row"
+            data-category={a.data.category}
+          >
+            <span class="a-date">{formatDateBg(a.data.date)}</span>
+            <span class="a-kicker">{a.data.kicker}</span>
+            <span class="a-title">{a.data.title}</span>
+            <span class="a-read">{a.data.readingTime.replace(" четене", "")}</span>
+          </a>
+        ))
+      }
+    </div>
+    <p class="empty" id="empty" hidden>Няма статии в тази категория.</p>
+  </main>
+</Layout>
+
+<style>
+  .page {
+    padding-top: 52px;
+    padding-bottom: 80px;
+  }
+  .page-title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 46px;
+    letter-spacing: -0.02em;
+    margin: 14px 0 12px;
+  }
+  .page-lead {
+    font-family: var(--serif);
+    font-size: 18px;
+    color: var(--body);
+    margin: 0 0 34px;
+    max-width: 40em;
+  }
+  .filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    border-top: 1px solid var(--ink);
+    padding-top: 24px;
+  }
+  .filter-btn {
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    padding: 8px 14px;
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    transition: all 0.12s ease;
+  }
+  .filter-btn.active {
+    background: var(--ink);
+    color: var(--cream);
+  }
+  .archive-list {
+    margin-top: 18px;
+  }
+  .archive-row {
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: 130px 130px 1fr 90px;
+    gap: 24px;
+    align-items: center;
+    padding: 22px 6px;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+  }
+  .archive-row:hover .a-title {
+    color: var(--accent);
+  }
+  .a-date {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--muted-3);
+  }
+  .a-kicker {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .a-title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.22;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .a-read {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted-3);
+    text-align: right;
+  }
+  .empty {
+    font-family: var(--serif);
+    color: var(--body);
+    padding: 30px 6px;
+  }
+  @media (max-width: 760px) {
+    .page-title {
+      font-size: 34px;
+    }
+    .archive-row {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+    .a-read {
+      text-align: left;
+    }
+  }
+</style>
+
+<script>
+  function initArchiveFilters() {
+    const filterWrap = document.getElementById("filters");
+    if (!filterWrap || filterWrap.dataset.bound) return;
+    filterWrap.dataset.bound = "1";
+
+    const buttons =
+      filterWrap.querySelectorAll<HTMLButtonElement>(".filter-btn");
+    const rows = document.querySelectorAll<HTMLElement>(".archive-row");
+    const empty = document.getElementById("empty");
+
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const filter = btn.dataset.filter!;
+        buttons.forEach((b) => b.classList.toggle("active", b === btn));
+        let visible = 0;
+        rows.forEach((row) => {
+          const show = filter === "Всички" || row.dataset.category === filter;
+          row.style.display = show ? "" : "none";
+          if (show) visible++;
+        });
+        if (empty) empty.hidden = visible !== 0;
+      });
+    });
+  }
+
+  initArchiveFilters();
+  document.addEventListener("astro:page-load", initArchiveFilters);
+</script>

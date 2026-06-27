@@ -1,0 +1,168 @@
+---
+// Преизползваема форма за абониране. Изпраща POST към /api/subscribe.
+interface Props {
+  badges?: boolean; // показвай ли реда с предимства
+  compact?: boolean;
+}
+const { badges = false, compact = false } = Astro.props;
+---
+
+<form class="sub-form" data-subscribe novalidate>
+  <div class:list={["sub-row", { compact }]}>
+    <input
+      type="email"
+      name="email"
+      required
+      placeholder="твоят@имейл.bg"
+      autocomplete="email"
+      class="sub-input"
+      data-email
+    />
+    <button type="submit" class="sub-btn" data-submit>Абонирай се</button>
+  </div>
+  <div class="sub-error" data-error hidden>
+    Моля, въведи валиден имейл адрес.
+  </div>
+  <div class="sub-ok" data-ok hidden>
+    ✓ Благодарим! Провери пощата си за потвърждение.
+  </div>
+  {
+    badges && (
+      <div class="sub-badges" data-badges>
+        <span>✓ Над 14 000 читатели</span>
+        <span>✓ Нов брой всяка събота</span>
+        <span>✓ Откажи се с един клик</span>
+      </div>
+    )
+  }
+</form>
+
+<style>
+  .sub-form {
+    width: 100%;
+  }
+  .sub-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .sub-row.compact {
+    margin-bottom: 0;
+  }
+  .sub-input {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--sans);
+    font-size: 15px;
+    padding: 14px 16px;
+    background: var(--cream);
+    color: var(--ink);
+    border: 1px solid var(--cream);
+    outline: none;
+  }
+  .sub-btn {
+    cursor: pointer;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--cream);
+    background: var(--accent);
+    border: none;
+    padding: 14px 22px;
+    white-space: nowrap;
+  }
+  .sub-btn:hover {
+    filter: brightness(1.06);
+  }
+  .sub-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+  .sub-error {
+    font-size: 13px;
+    color: #e89a82;
+    margin-bottom: 14px;
+  }
+  .sub-ok {
+    font-size: 14px;
+    color: #a89e8c;
+    font-family: var(--mono);
+    margin-top: 4px;
+  }
+  .sub-badges {
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: #a89e8c;
+  }
+</style>
+
+<script>
+  function initSubscribeForms() {
+    const forms =
+      document.querySelectorAll<HTMLFormElement>("form[data-subscribe]");
+    forms.forEach((form) => {
+      if (form.dataset.bound) return;
+      form.dataset.bound = "1";
+
+      const input = form.querySelector<HTMLInputElement>("[data-email]")!;
+      const btn = form.querySelector<HTMLButtonElement>("[data-submit]")!;
+      const errEl = form.querySelector<HTMLElement>("[data-error]")!;
+      const okEl = form.querySelector<HTMLElement>("[data-ok]")!;
+      const badges = form.querySelector<HTMLElement>("[data-badges]");
+
+      const showError = () => {
+        errEl.hidden = false;
+        okEl.hidden = true;
+      };
+
+      input.addEventListener("input", () => {
+        errEl.hidden = true;
+      });
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = input.value.trim();
+        if (!email.includes("@") || email.length < 5) {
+          showError();
+          return;
+        }
+        btn.disabled = true;
+        const original = btn.textContent;
+        btn.textContent = "Изпращане…";
+        try {
+          const res = await fetch("/api/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+          const data = (await res.json().catch(() => ({}))) as {
+            ok?: boolean;
+            error?: string;
+          };
+          if (res.ok && data.ok) {
+            // Успех: скрий формата, покажи благодарност.
+            const row = form.querySelector<HTMLElement>(".sub-row");
+            if (row) row.style.display = "none";
+            if (badges) badges.style.display = "none";
+            errEl.hidden = true;
+            okEl.hidden = false;
+          } else {
+            showError();
+          }
+        } catch {
+          showError();
+        } finally {
+          btn.disabled = false;
+          btn.textContent = original;
+        }
+      });
+    });
+  }
+
+  initSubscribeForms();
+  document.addEventListener("astro:page-load", initSubscribeForms);
+</script>

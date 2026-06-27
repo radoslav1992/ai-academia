@@ -1,0 +1,84 @@
+---
+import { formatDateShort } from "../lib/site";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  article: CollectionEntry<"articles">;
+}
+const { article } = Astro.props;
+const { data } = article;
+const byline = `${data.author} · ${formatDateShort(data.date)}`;
+---
+
+<article class="card">
+  <a href={`/articles/${article.id}`} class="card-panel" style={`background:${data.panelColor}`}>
+    {data.tagline && <span class="card-tagline">{data.tagline}</span>}
+  </a>
+  <div class="card-kicker">{data.kicker}</div>
+  <h3 class="card-title">
+    <a href={`/articles/${article.id}`}>{data.title}</a>
+  </h3>
+  <p class="card-standfirst">{data.standfirst}</p>
+  <div class="card-byline">{byline}</div>
+</article>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+  }
+  .card-panel {
+    aspect-ratio: 16 / 10;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    padding: 14px;
+    text-decoration: none;
+  }
+  .card-tagline {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(244, 238, 226, 0.82);
+  }
+  .card-kicker {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 9px;
+  }
+  .card-title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 21px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+    color: var(--ink);
+  }
+  .card-title a {
+    text-decoration: none;
+    color: inherit;
+  }
+  .card-title a:hover {
+    color: var(--accent);
+  }
+  .card-standfirst {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--body-2);
+    margin: 0 0 14px;
+  }
+  .card-byline {
+    margin-top: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    color: var(--muted-3);
+  }
+</style>

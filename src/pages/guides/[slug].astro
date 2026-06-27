@@ -1,0 +1,156 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import SubscribeForm from "../../components/SubscribeForm.astro";
+
+export async function getStaticPaths() {
+  const guides = await getCollection("guides");
+  return guides.map((guide) => ({
+    params: { slug: guide.id },
+    props: { guide },
+  }));
+}
+
+const { guide } = Astro.props;
+const { Content } = await render(guide);
+const d = guide.data;
+---
+
+<Layout title={d.title} description={d.description} showDateline={false}>
+  <main>
+    <article class="guide-head">
+      <a href="/guides" class="back">← Ръководства</a>
+      <div class="g-kicker">Ръководство</div>
+      <h1 class="g-title">{d.title}</h1>
+      <div class="g-meta">{d.meta}</div>
+      {d.description && <p class="g-lead">{d.description}</p>}
+    </article>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <div class="inline-cta-wrap">
+      <div class="inline-cta">
+        <div class="cta-title">Учи стъпка по стъпка — всяка събота.</div>
+        <p class="cta-text">
+          Абонирай се за бюлетина и получавай нови ръководства директно в пощата
+          си.
+        </p>
+        <SubscribeForm compact />
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .guide-head {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 52px 28px 20px;
+  }
+  .back {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted-3);
+    text-decoration: none;
+  }
+  .back:hover {
+    color: var(--accent);
+  }
+  .g-kicker {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 26px 0 14px;
+  }
+  .g-title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 42px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  .g-meta {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-3);
+    margin-bottom: 18px;
+  }
+  .g-lead {
+    font-family: var(--serif);
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--body);
+    margin: 0;
+  }
+  .prose {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 28px 28px 20px;
+    font-family: var(--serif);
+    color: var(--ink-soft);
+  }
+  .prose :global(p) {
+    font-size: 19px;
+    line-height: 1.7;
+    margin: 0 0 24px;
+  }
+  .prose :global(h2) {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    margin: 38px 0 16px;
+    color: var(--ink);
+  }
+  .prose :global(ol),
+  .prose :global(ul) {
+    font-size: 19px;
+    line-height: 1.7;
+    margin: 0 0 24px;
+    padding-left: 1.2em;
+  }
+  .prose :global(li) {
+    margin-bottom: 10px;
+  }
+  .prose :global(strong) {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .inline-cta-wrap {
+    max-width: 680px;
+    margin: 24px auto 72px;
+    padding: 0 28px;
+  }
+  .inline-cta {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 34px;
+  }
+  .cta-title {
+    font-family: var(--serif);
+    font-size: 24px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+  .cta-text {
+    color: #c9c0b0;
+    font-size: 15px;
+    line-height: 1.55;
+    margin: 0 0 18px;
+  }
+  @media (max-width: 760px) {
+    .g-title {
+      font-size: 30px;
+    }
+  }
+</style>

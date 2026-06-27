@@ -1,0 +1,296 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import NodeGraphic from "../../components/NodeGraphic.astro";
+import SubscribeForm from "../../components/SubscribeForm.astro";
+import { formatDateBg } from "../../lib/site";
+
+export async function getStaticPaths() {
+  const articles = await getCollection("articles");
+  return articles.map((article) => ({
+    params: { slug: article.id },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+const { Content } = await render(article);
+const d = article.data;
+
+// Свързани статии (различни от текущата).
+const all = (await getCollection("articles")).filter((a) => a.id !== article.id);
+const related = all
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+---
+
+<Layout title={d.title} description={d.standfirst} showDateline={false}>
+  <main>
+    <article class="article-head">
+      <a href="/" class="back">← Начало</a>
+      <div class="art-kicker">{d.kicker}</div>
+      <h1 class="art-title">{d.title}</h1>
+      <p class="art-standfirst">{d.standfirst}</p>
+      <div class="art-author">
+        <div class="avatar">{d.authorInitials}</div>
+        <div class="art-author-meta">
+          <div class="name">{d.author}</div>
+          <div class="mono">{formatDateBg(d.date)} · {d.readingTime}</div>
+        </div>
+      </div>
+    </article>
+
+    <div class="art-hero-wrap">
+      <NodeGraphic variant="wide" caption="Илюстрация · AI Академия" />
+    </div>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <!-- inline CTA -->
+    <div class="inline-cta-wrap">
+      <div class="inline-cta">
+        <div class="cta-title">Хареса ли ти този анализ?</div>
+        <p class="cta-text">
+          Получавай по един такъв всяка събота. Безплатно, на български.
+        </p>
+        <SubscribeForm compact />
+      </div>
+    </div>
+
+    <!-- related -->
+    <section class="related-wrap">
+      <div class="section-head no-link">
+        <h2>Прочети също</h2>
+      </div>
+      <div class="related-grid">
+        {
+          related.map((a) => (
+            <a href={`/articles/${a.id}`} class="related-card">
+              <div class="related-panel" style={`background:${a.data.panelColor}`} />
+              <div class="related-kicker">{a.data.kicker}</div>
+              <h3 class="related-title">{a.data.title}</h3>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .article-head {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 52px 28px 40px;
+  }
+  .back {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted-3);
+    text-decoration: none;
+  }
+  .back:hover {
+    color: var(--accent);
+  }
+  .art-kicker {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 26px 0 18px;
+  }
+  .art-title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 44px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 22px;
+    text-wrap: balance;
+  }
+  .art-standfirst {
+    font-family: var(--serif);
+    font-size: 21px;
+    line-height: 1.5;
+    color: var(--body);
+    margin: 0 0 30px;
+  }
+  .art-author {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 22px 0;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--line);
+  }
+  .avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+  .art-author-meta {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .art-author-meta .name {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .art-author-meta .mono {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted-3);
+  }
+
+  .art-hero-wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 28px 8px;
+  }
+
+  /* Prose */
+  .prose {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 36px 28px 20px;
+    font-family: var(--serif);
+    color: var(--ink-soft);
+  }
+  .prose :global(p) {
+    font-size: 19px;
+    line-height: 1.7;
+    margin: 0 0 24px;
+  }
+  .prose :global(p:first-of-type::first-letter) {
+    float: left;
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 74px;
+    line-height: 0.78;
+    padding: 6px 12px 0 0;
+    color: var(--accent);
+  }
+  .prose :global(h2) {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    margin: 38px 0 16px;
+    color: var(--ink);
+  }
+  .prose :global(blockquote) {
+    margin: 36px 0;
+    padding: 6px 0 6px 28px;
+    border-left: 3px solid var(--accent);
+  }
+  .prose :global(blockquote p) {
+    font-style: italic;
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1.4;
+    color: var(--ink);
+    margin: 0;
+  }
+  .prose :global(a) {
+    color: var(--accent);
+  }
+  .prose :global(ul),
+  .prose :global(ol) {
+    font-size: 19px;
+    line-height: 1.7;
+    margin: 0 0 24px;
+    padding-left: 1.2em;
+  }
+  .prose :global(li) {
+    margin-bottom: 8px;
+  }
+
+  /* inline CTA */
+  .inline-cta-wrap {
+    max-width: 680px;
+    margin: 24px auto;
+    padding: 0 28px;
+  }
+  .inline-cta {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 34px;
+  }
+  .cta-title {
+    font-family: var(--serif);
+    font-size: 24px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+  .cta-text {
+    color: #c9c0b0;
+    font-size: 15px;
+    line-height: 1.55;
+    margin: 0 0 18px;
+  }
+
+  /* related */
+  .related-wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 28px 72px;
+  }
+  .section-head.no-link {
+    margin-bottom: 26px;
+  }
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+  }
+  .related-card {
+    text-decoration: none;
+  }
+  .related-panel {
+    aspect-ratio: 16 / 10;
+    margin-bottom: 14px;
+  }
+  .related-kicker {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .related-title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.2;
+    margin: 0;
+    color: var(--ink);
+  }
+  .related-card:hover .related-title {
+    color: var(--accent);
+  }
+
+  @media (max-width: 760px) {
+    .art-title {
+      font-size: 32px;
+    }
+    .related-grid {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+</style>

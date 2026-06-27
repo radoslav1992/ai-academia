@@ -1,0 +1,117 @@
+---
+import { SITE } from "../lib/site";
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div>
+      <div class="footer-brand">AI Академия</div>
+      <p class="footer-about">{SITE.description}</p>
+    </div>
+    <div>
+      <div class="footer-head">Раздели</div>
+      <div class="ln footer-links">
+        <a href="/">Начало</a>
+        <a href="/archive">Архив</a>
+        <a href="/guides">Ръководства</a>
+        <a href="/tools">Инструменти</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-head">Учи</div>
+      <div class="ln footer-links">
+        <a href="/guides">Основи на ИИ</a>
+        <a href="/guides">Подсказки (prompts)</a>
+        <a href="/tools">Инструменти</a>
+        <a href="/guides">Речник на ИИ</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-head">Бюлетин</div>
+      <div class="ln footer-links">
+        <a href="/#subscribe">Абонирай се</a>
+        <a href="/archive">Минали броеве</a>
+        <a href="/about">За нас</a>
+        <a href="/about">Контакти</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom-wrap">
+    <div class="wrap footer-bottom">
+      <span>© {year} AI Академия · Изкуствен интелект на български</span>
+      <span>Откажи се по всяко време · Без спам</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--ink);
+    background: var(--cream);
+  }
+  .footer-grid {
+    padding-top: 52px;
+    padding-bottom: 30px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 40px;
+  }
+  .footer-brand {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 23px;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+  }
+  .footer-about {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--muted);
+    margin: 12px 0 0;
+    max-width: 24em;
+  }
+  .footer-head {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 14px;
+  }
+  .footer-links a {
+    color: var(--body-2);
+    text-decoration: none;
+  }
+  .footer-links a:hover {
+    color: var(--accent);
+  }
+  .footer-bottom-wrap {
+    border-top: 1px solid var(--line);
+  }
+  .footer-bottom {
+    padding-top: 18px;
+    padding-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--muted-3);
+  }
+  @media (max-width: 760px) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+  }
+</style>

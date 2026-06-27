@@ -1,0 +1,21 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# cloudflare / wrangler
+.wrangler/
+.dev.vars
+.dev.vars.*
+worker-configuration.generated.d.ts
+
+# logs & os
+*.log
+npm-debug.log*
+.DS_Store
+
+# env
+.env
+.env.production

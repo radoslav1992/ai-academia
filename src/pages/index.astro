@@ -1,0 +1,395 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import ArticleCard from "../components/ArticleCard.astro";
+import NodeGraphic from "../components/NodeGraphic.astro";
+import SubscribeForm from "../components/SubscribeForm.astro";
+import { formatDateBg } from "../lib/site";
+
+const allArticles = (await getCollection("articles")).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+const featured = allArticles.find((a) => a.data.featured) ?? allArticles[0];
+const latest = allArticles.filter((a) => a.id !== featured.id).slice(0, 6);
+
+const guides = (await getCollection("guides")).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const learning = (await getCollection("learning")).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const f = featured.data;
+---
+
+<Layout>
+  <main>
+    <!-- Hero -->
+    <section class="wrap hero">
+      <div class="hero-grid">
+        <div>
+          <div class="hero-eyebrow">
+            <span class="rule"></span>Водеща тема
+          </div>
+          <h1 class="hero-title">
+            <a href={`/articles/${featured.id}`}>{f.title}</a>
+          </h1>
+          <p class="hero-standfirst">{f.standfirst}</p>
+          <div class="hero-author">
+            <div class="avatar">{f.authorInitials}</div>
+            <div class="hero-author-meta">
+              <div class="name">{f.author}</div>
+              <div class="mono small">
+                {formatDateBg(f.date)} · {f.readingTime}
+              </div>
+            </div>
+          </div>
+          <a href={`/articles/${featured.id}`} class="read-link"
+            >Прочети анализа →</a
+          >
+        </div>
+        <a href={`/articles/${featured.id}`} class="hero-graphic-link">
+          <NodeGraphic variant="square" label="Генеративни модели" />
+        </a>
+      </div>
+    </section>
+
+    <!-- Latest -->
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Последно от редакцията</h2>
+        <a href="/archive">Виж всички →</a>
+      </div>
+    </div>
+    <section class="wrap latest">
+      <div class="latest-grid">
+        {latest.map((a) => <ArticleCard article={a} />)}
+      </div>
+    </section>
+
+    <!-- Newsletter band -->
+    <section id="subscribe" class="band">
+      <div class="wrap band-grid">
+        <div>
+          <div class="band-eyebrow">Бюлетинът</div>
+          <h2 class="band-title">
+            Получавай най-важното за ИИ — всяка събота сутрин.
+          </h2>
+          <p class="band-text">
+            Един имейл седмично: подбрани новини, ясни обяснения и практични
+            ръководства. Написано на разбираем български, без шум и без жаргон.
+          </p>
+        </div>
+        <div>
+          <SubscribeForm badges />
+        </div>
+      </div>
+    </section>
+
+    <!-- Guides -->
+    <section class="wrap guides">
+      <div class="section-head">
+        <h2>Ръководства стъпка по стъпка</h2>
+        <a href="/guides">Всички ръководства →</a>
+      </div>
+      <div class="guide-list">
+        {
+          guides.slice(0, 4).map((g) => (
+            <a href="/guides" class="guide-row">
+              <span class="guide-n">{String(g.data.order).padStart(2, "0")}</span>
+              <span>
+                <span class="guide-title">{g.data.title}</span>
+                <span class="guide-meta">{g.data.meta}</span>
+              </span>
+              <span class="guide-arrow">→</span>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Learning -->
+    <section class="wrap learning">
+      <div class="section-head no-link">
+        <h2>Учебни материали</h2>
+      </div>
+      <div class="learning-grid">
+        {
+          learning.map((c) => (
+            <a href="/guides" class="learn-card">
+              <span class="learn-level">{c.data.level}</span>
+              <h3 class="learn-title">{c.data.title}</h3>
+              <span class="learn-meta">{c.data.meta}</span>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  /* Hero */
+  .hero {
+    padding-top: 48px;
+    padding-bottom: 40px;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 52px;
+    align-items: center;
+  }
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-eyebrow .rule {
+    width: 26px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .hero-title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 50px;
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    margin: 0 0 22px;
+    text-wrap: balance;
+  }
+  .hero-title a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .hero-title a:hover {
+    color: var(--accent);
+  }
+  .hero-standfirst {
+    font-family: var(--serif);
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--body);
+    margin: 0 0 26px;
+    max-width: 33em;
+  }
+  .hero-author {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 30px;
+  }
+  .avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .hero-author-meta {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .hero-author-meta .name {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .small {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+  .read-link {
+    display: inline-block;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 4px;
+  }
+  .hero-graphic-link {
+    display: block;
+  }
+
+  /* Latest */
+  .latest {
+    padding-top: 28px;
+    padding-bottom: 56px;
+  }
+  .latest-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 34px 30px;
+  }
+
+  /* Band */
+  .band {
+    background: var(--ink);
+    color: var(--cream);
+  }
+  .band-grid {
+    padding-top: 64px;
+    padding-bottom: 64px;
+    display: grid;
+    grid-template-columns: 1fr 0.9fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .band-eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  .band-title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+  }
+  .band-text {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #c9c0b0;
+    margin: 0;
+    max-width: 34em;
+  }
+
+  /* Guides */
+  .guides {
+    padding-top: 64px;
+    padding-bottom: 20px;
+  }
+  .guide-list {
+    margin-top: 8px;
+  }
+  .guide-row {
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    gap: 24px;
+    align-items: center;
+    padding: 22px 8px;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+  }
+  .guide-row:hover .guide-title {
+    color: var(--accent);
+  }
+  .guide-n {
+    font-family: var(--serif);
+    font-size: 30px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .guide-title {
+    display: block;
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .guide-meta {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--muted-3);
+    margin-top: 5px;
+    text-transform: uppercase;
+  }
+  .guide-arrow {
+    font-size: 22px;
+    color: var(--ink);
+  }
+
+  /* Learning */
+  .learning {
+    padding-top: 48px;
+    padding-bottom: 72px;
+  }
+  .section-head.no-link {
+    margin-bottom: 26px;
+  }
+  .learning-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .learn-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--panel-cream);
+    border: 1px solid var(--line);
+    padding: 28px;
+    min-height: 200px;
+    text-decoration: none;
+  }
+  .learn-card:hover {
+    border-color: var(--accent);
+  }
+  .learn-level {
+    display: inline-block;
+    align-self: flex-start;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 9px;
+    margin-bottom: 20px;
+  }
+  .learn-title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 23px;
+    line-height: 1.18;
+    color: var(--ink);
+    margin: 0 0 14px;
+  }
+  .learn-meta {
+    margin-top: auto;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 900px) {
+    .hero-grid,
+    .band-grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .hero-title {
+      font-size: 38px;
+    }
+    .band-title {
+      font-size: 30px;
+    }
+    .latest-grid,
+    .learning-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

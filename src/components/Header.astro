@@ -1,0 +1,166 @@
+---
+import { NAV, SITE, formatDateBg } from "../lib/site";
+
+interface Props {
+  showDateline?: boolean;
+}
+const { showDateline = true } = Astro.props;
+
+const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
+const isActive = (href: string) =>
+  href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+const today = formatDateBg(new Date());
+---
+
+<header class="site-header">
+  {
+    showDateline && (
+      <div class="dateline-wrap">
+        <div class="wrap dateline">
+          <span>{SITE.city} · {today}</span>
+          <span class="dateline-right">
+            <span>Брой №{SITE.issues}</span>
+            <span class="dot">●</span>
+            <span>Седмичен бюлетин</span>
+          </span>
+        </div>
+      </div>
+    )
+  }
+  <div class="wrap header-bar">
+    <a href="/" class="brand">
+      <span class="brand-name">AI&nbsp;Академия</span>
+      <span class="brand-tag">{SITE.tagline}</span>
+    </a>
+    <div class="header-right">
+      <nav class="ln nav">
+        {
+          NAV.map((item) => (
+            <a
+              href={item.href}
+              class:list={["nav-link", { active: isActive(item.href) }]}
+            >
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+      <a href="/#subscribe" class="subscribe-btn">Абонирай се</a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(244, 238, 226, 0.94);
+    backdrop-filter: saturate(1.1) blur(6px);
+    border-bottom: 1px solid var(--ink);
+  }
+  .dateline-wrap {
+    border-bottom: 1px solid var(--line);
+  }
+  .dateline {
+    padding-top: 7px;
+    padding-bottom: 7px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--muted-2);
+    text-transform: uppercase;
+  }
+  .dateline-right {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+  .dateline-right .dot {
+    color: var(--accent);
+  }
+  .header-bar {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+  }
+  .brand {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .brand-name {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 27px;
+    letter-spacing: -0.015em;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .brand-tag {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.22em;
+    color: var(--muted-2);
+    text-transform: uppercase;
+  }
+  .header-right {
+    display: flex;
+    align-items: flex-end;
+    gap: 30px;
+  }
+  .nav {
+    display: flex;
+    gap: 26px;
+    align-items: flex-end;
+  }
+  .nav-link {
+    text-decoration: none;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    padding-bottom: 6px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease;
+  }
+  .nav-link:hover {
+    color: var(--ink);
+  }
+  .nav-link.active {
+    font-weight: 600;
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+  .subscribe-btn {
+    text-decoration: none;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    color: var(--cream);
+    background: var(--accent);
+    padding: 10px 18px;
+    white-space: nowrap;
+  }
+  .subscribe-btn:hover {
+    filter: brightness(1.05);
+  }
+
+  @media (max-width: 760px) {
+    .nav {
+      display: none;
+    }
+    .header-right {
+      gap: 0;
+    }
+  }
+</style>
