@@ -16,7 +16,7 @@
     {
       "binding": "DB",
       "database_name": "ai_akademia_db",
-      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+      "database_id": "5111ddef-9117-4ad3-8bdc-c30e3ba72fa6"
     }
   ],
   // --- Cloudflare Email Sending (send_email binding) ---
